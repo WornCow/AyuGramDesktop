@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "boxes/transfer_gift_box.h"
 
+
 #include "apiwrap.h"
 #include "api/api_cloud_password.h"
 #include "api/api_credits.h"
@@ -57,6 +58,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_info.h" // defaultSubTabs.
 #include "styles/style_layers.h" // boxLabel.
 #include "styles/style_settings.h"
+
+// AyuGram includes
+#include "ayu/features/local_gifts/local_gifts.h"
+
 
 namespace {
 
@@ -1247,6 +1252,26 @@ void ShowBuyResaleGiftBox(
 		) | rpl::on_next([=](bool toggled) {
 			state->hideName = toggled;
 		}, container->lifetime());
+		Ui::AddSkip(container);
+
+		// AyuGram: visual-only NFT gift, nothing is bought or sent.
+		container->add(
+			object_ptr<Ui::SettingsButton>(
+				container,
+				rpl::single(QString::fromUtf8("\xF0\x9F\x91\x81 Подарить подарок")),
+				st::settingsButtonNoIcon)
+		)->setClickedCallback([=] {
+			AyuFeatures::LocalGifts::GiveUnique(
+				show,
+				to,
+				gift,
+				(state->messageAllowed.current()
+					? state->message.current()
+					: TextWithEntities()),
+				state->hideName.current());
+			closeParentBox(false);
+			box->closeBox();
+		});
 		Ui::AddSkip(container);
 		Ui::AddDividerText(container, to->isSelf()
 			? tr::lng_gift_send_anonymous_self()

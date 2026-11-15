@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "history/view/media/history_view_premium_gift.h"
 
+
 #include "apiwrap.h"
 #include "api/api_credits.h" // InputSavedStarGiftId
 #include "api/api_premium.h"
@@ -35,6 +36,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text_utilities.h"
 #include "window/window_session_controller.h"
 #include "styles/style_chat.h"
+
+// AyuGram includes
+#include "ayu/features/local_gifts/local_gifts.h"
+
 
 namespace HistoryView {
 
@@ -514,6 +519,16 @@ ClickHandlerPtr OpenStarGiftLink(not_null<HistoryItem*> item) {
 	const auto gift = media ? media->gift() : nullptr;
 	if (!gift || gift->type != Data::GiftType::StarGift) {
 		return nullptr;
+	}
+	if (AyuFeatures::LocalGifts::IsLocal(item)) {
+		return std::make_shared<LambdaClickHandler>([](ClickContext context) {
+			const auto my = context.other.value<ClickHandlerContext>();
+			if (const auto controller = my.sessionWindow.get()) {
+				controller->showToast(
+					u"Это локальный подарок, его видите только вы "_q
+						+ AyuFeatures::LocalGifts::Marker());
+			}
+		});
 	}
 	const auto data = *gift;
 	const auto itemId = item->fullId();

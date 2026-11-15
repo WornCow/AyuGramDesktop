@@ -87,6 +87,7 @@ struct GiftTypeStars {
 	bool hidden : 1 = false;
 	bool resale : 1 = false;
 	bool mine : 1 = false;
+	bool localFake : 1 = false; // AyuGram: visual-only gift.
 
 	[[nodiscard]] friend inline bool operator==(
 		const GiftTypeStars&,

@@ -1478,6 +1478,15 @@ void HistoryItem::setCommentsItemId(FullMsgId id) {
 	}
 }
 
+void HistoryItem::setLocalStarGiftMedia(Data::GiftCode &&data) {
+	Expects(isLocal());
+
+	_media = std::make_unique<Data::MediaGiftBox>(
+		this,
+		_from,
+		std::move(data));
+}
+
 void HistoryItem::setServiceText(PreparedServiceText &&prepared) {
 	AddComponents(HistoryServiceData::Bit());
 	_flags &= ~MessageFlag::HasTextLinks;

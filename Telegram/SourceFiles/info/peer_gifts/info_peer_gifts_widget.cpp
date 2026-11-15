@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "info/peer_gifts/info_peer_gifts_widget.h"
 
+
 #include "api/api_credits.h"
 #include "api/api_hash.h"
 #include "api/api_premium.h"
@@ -51,6 +52,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_credits.h" // giftBoxPadding
 
 #include <QtWidgets/QApplication>
+
+// AyuGram includes
+#include "ayu/features/local_gifts/local_gifts.h"
+
 
 namespace Info::PeerGifts {
 namespace {
@@ -712,6 +717,22 @@ void InnerWidget::loaded(const MTPpayments_SavedStarGifts &result) {
 	}
 	_list->reserve(_list->size() + data.vgifts().v.size());
 
+	// AyuGram: local (visual only) gifts go first, in the "all" list.
+	if (_list->empty() && !descriptor.collectionId) {
+		for (auto &local : AyuFeatures::LocalGifts::ForPeer(_peer)) {
+			auto descriptor = DescriptorForGift(_peer, local);
+			if (const auto stars = std::get_if<GiftTypeStars>(
+					&descriptor)) {
+				stars->localFake = true;
+			}
+			_list->push_back({
+				.gift = std::move(local),
+				.descriptor = std::move(descriptor),
+			});
+			++_entries->total;
+		}
+	}
+
 	const auto i = ranges::find(
 		_collections,
 		descriptor.collectionId,
@@ -1229,6 +1250,15 @@ void InnerWidget::showMenuFor(not_null<GiftButton*> button, QPoint point) {
 
 void InnerWidget::showGift(int index) {
 	Expects(index >= 0 && index < _list->size());
+
+	if (AyuFeatures::LocalGifts::IsLocal((*_list)[index].gift.manageId)) {
+		if (!_addingToCollectionId) {
+			_window->showToast(
+				u"Это локальный подарок, его видите только вы "_q
+					+ AyuFeatures::LocalGifts::Marker());
+		}
+		return;
+	}
 
 	if (const auto id = _addingToCollectionId) {
 		const auto &gift = (*_list)[index].gift;

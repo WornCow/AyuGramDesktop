@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "info/peer_gifts/info_peer_gifts_common.h"
 
+
 #include "api/api_global_privacy.h"
 #include "api/api_premium.h"
 #include "base/unixtime.h"
@@ -45,6 +46,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 // AyuGram includes
 #include "ayu/ayu_ui_settings.h"
 #include "ayu/ui/ayu_userpic.h"
+#include "ayu/features/local_gifts/local_gifts.h"
 
 
 namespace Info::PeerGifts {
@@ -918,6 +920,14 @@ void GiftButton::paint(QPainter &p, float64 craftProgress) {
 		}
 		return GiftBadge();
 	}, [&](const GiftTypeStars &data) {
+		if (data.localFake) {
+			return GiftBadge{
+				.text = AyuFeatures::LocalGifts::Marker(),
+				.bg1 = st::windowSubTextFg->c,
+				.fg = st::windowBg->c,
+				.small = true,
+			};
+		}
 		const auto count = data.info.limitedCount;
 		const auto pinned = data.pinned || data.pinnedSelection;
 		const auto now = base::unixtime::now();

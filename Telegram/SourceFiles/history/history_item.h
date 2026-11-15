@@ -50,6 +50,7 @@ using SharedMediaTypesMask = base::enum_mask<SharedMediaType>;
 
 namespace Data {
 struct MessagePosition;
+struct GiftCode;
 struct RecentReaction;
 struct MessageReactionsTopPaid;
 struct ReactionId;
@@ -655,6 +656,9 @@ public:
 	void updateDate(TimeId newDate);
 	[[nodiscard]] bool canUpdateDate() const;
 	void customEmojiRepaint();
+	// AyuGram: local (visual only) star gift, see ayu/features/local_gifts.
+	void setLocalStarGiftMedia(Data::GiftCode &&data);
+
 	void setMediaForInstantView(
 		QString url,
 		DocumentData *document = nullptr,

@@ -134,6 +134,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QtWidgets/QApplication>
 
+// AyuGram includes
+#include "ayu/features/local_gifts/local_gifts.h"
+
+
 namespace Ui {
 namespace {
 
@@ -5122,6 +5126,34 @@ void SendGiftBox(
 			state->details = std::move(now);
 		}, container->lifetime());
 		AddSkip(container);
+
+		// AyuGram: visual-only gift, nothing is sent or paid.
+		if (!stars->info.auction()) {
+			container->add(
+				object_ptr<SettingsButton>(
+					container,
+					rpl::single(QString::fromUtf8("\xF0\x9F\x91\x81 Подарить подарок")),
+					st::settingsButtonNoIcon)
+			)->setClickedCallback([=] {
+				auto details = state->details.current();
+				const auto local = std::get_if<GiftTypeStars>(
+					&details.descriptor);
+				if (!local) {
+					return;
+				}
+				const auto copy = state->media; // Keep sticker loaded.
+				AyuFeatures::LocalGifts::Give(
+					window->uiShow(),
+					peer,
+					local->info,
+					(state->messageAllowed.current()
+						? details.text
+						: TextWithEntities()),
+					details.anonymous);
+				box->closeBox();
+			});
+			AddSkip(container);
+		}
 	}
 	v::match(descriptor, [&](const GiftTypePremium &data) {
 		AddDividerText(messageInner, tr::lng_gift_send_premium_about(

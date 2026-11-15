@@ -217,6 +217,8 @@ set(ayugram_files
         ayu/features/streamer_mode/platform/win/streamer_mode_win.cpp
         ayu/features/streamer_mode/platform/win/streamer_mode_win.h
         ayu/features/streamer_mode/platform/platform_streamer_mode.h
+        ayu/features/local_gifts/local_gifts.cpp
+        ayu/features/local_gifts/local_gifts.h
         ayu/features/streamer_mode/streamer_mode.cpp
         ayu/features/streamer_mode/streamer_mode.h
         ayu/features/message_shot/message_shot.cpp
