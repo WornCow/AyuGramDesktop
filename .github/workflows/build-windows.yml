@@ -1,9 +1,11 @@
 name: Build AyuGram (Windows x64)
 
-# Run manually: Actions -> "Build AyuGram (Windows x64)" -> Run workflow.
+# Runs on every push to the local-gifts branch, or manually from Actions.
 # The first run builds all libraries (several hours). Libraries are cached
 # even if the run fails later, so the next run starts from that point.
 on:
+  push:
+    branches: [local-gifts]
   workflow_dispatch:
 
 jobs:
