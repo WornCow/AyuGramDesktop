@@ -74,6 +74,9 @@ void Give(
 					gift.stars),
 			},
 			tr::marked);
+	if (unique) {
+		serviceText.text += u" "_q + Data::UniqueGiftName(*unique);
+	}
 	serviceText.text += u" "_q + Marker();
 
 	const auto item = history->makeMessage({
