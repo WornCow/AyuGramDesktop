@@ -55,6 +55,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 // AyuGram includes
 #include "ayu/features/local_gifts/local_gifts.h"
+#include "ui/basic_click_handlers.h"
 
 
 namespace Info::PeerGifts {
@@ -1252,7 +1253,12 @@ void InnerWidget::showGift(int index) {
 	Expects(index >= 0 && index < _list->size());
 
 	if (AyuFeatures::LocalGifts::IsLocal((*_list)[index].gift.manageId)) {
-		if (!_addingToCollectionId) {
+		const auto &unique = (*_list)[index].gift.info.unique;
+		if (unique && !_addingToCollectionId) {
+			UrlClickHandler::Open(
+				_peer->session().createInternalLinkFull(
+					u"nft/"_q + unique->slug));
+		} else if (!_addingToCollectionId) {
 			_window->showToast(
 				u"Это локальный подарок, его видите только вы "_q
 					+ AyuFeatures::LocalGifts::Marker());

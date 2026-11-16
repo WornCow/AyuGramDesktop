@@ -521,7 +521,15 @@ ClickHandlerPtr OpenStarGiftLink(not_null<HistoryItem*> item) {
 		return nullptr;
 	}
 	if (AyuFeatures::LocalGifts::IsLocal(item)) {
-		return std::make_shared<LambdaClickHandler>([](ClickContext context) {
+		const auto session = &item->history()->session();
+		const auto slug = gift->unique ? gift->unique->slug : QString();
+		return std::make_shared<LambdaClickHandler>([=](ClickContext context) {
+			if (!slug.isEmpty()) {
+				// Public NFT page with real data, not the local copy.
+				UrlClickHandler::Open(
+					session->createInternalLinkFull(u"nft/"_q + slug));
+				return;
+			}
 			const auto my = context.other.value<ClickHandlerContext>();
 			if (const auto controller = my.sessionWindow.get()) {
 				controller->showToast(
