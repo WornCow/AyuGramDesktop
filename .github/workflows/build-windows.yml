@@ -22,6 +22,27 @@ jobs:
         shell: cmd
 
     steps:
+      - name: Free disk space.
+        shell: pwsh
+        run: |
+          Get-PSDrive C | Select-Object Used,Free
+          $dirs = @(
+            'C:\Android', 'C:\Program Files (x86)\Android', 'C:\ghcup',
+            'C:\Julia', 'C:\Miniconda', 'C:\Strawberry', 'C:\rtools45',
+            'C:\rtools44', 'C:\selenium', 'C:\SeleniumWebDrivers',
+            'C:\Program Files\dotnet\sdk\NuGetFallbackFolder',
+            'C:\hostedtoolcache\windows\go', 'C:\hostedtoolcache\windows\Ruby',
+            'C:\hostedtoolcache\windows\PyPy', 'C:\hostedtoolcache\windows\node',
+            'C:\Program Files\Azure Cosmos DB Emulator', 'C:\Program Files\MongoDB',
+            'C:\Program Files\PostgreSQL', 'C:\Program Files\Microsoft SQL Server',
+            'C:\Program Files\R', 'C:\Program Files\LLVM', 'C:\msys64'
+          )
+          foreach ($d in $dirs) {
+            if (Test-Path $d) { cmd /c "rmdir /s /q `"$d`"" 2>$null }
+          }
+          docker system prune -a -f 2>$null
+          Get-PSDrive C | Select-Object Used,Free
+
       - name: Prepare directories.
         run: |
           mkdir %userprofile%\TBuild\Libraries
@@ -120,7 +141,7 @@ jobs:
           -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON ^
           -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
 
-          cmake --build ..\out --config Debug --parallel
+          cmake --build ..\out --config Debug --target Telegram --parallel
 
       - name: Move artifact.
         run: |
