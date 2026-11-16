@@ -5141,16 +5141,21 @@ void SendGiftBox(
 				if (!local) {
 					return;
 				}
-				const auto copy = state->media; // Keep sticker loaded.
-				AyuFeatures::LocalGifts::Give(
-					window->uiShow(),
-					peer,
-					local->info,
-					(state->messageAllowed.current()
-						? details.text
-						: TextWithEntities()),
-					details.anonymous);
+				const auto show = window->uiShow();
+				const auto info = local->info;
+				const auto text = state->messageAllowed.current()
+					? details.text
+					: TextWithEntities();
+				const auto anonymous = details.anonymous;
 				box->closeBox();
+				crl::on_main(&peer->session(), [=] {
+					AyuFeatures::LocalGifts::Give(
+						show,
+						peer,
+						info,
+						text,
+						anonymous);
+				});
 			});
 			AddSkip(container);
 		}

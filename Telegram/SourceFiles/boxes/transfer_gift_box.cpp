@@ -1261,16 +1261,21 @@ void ShowBuyResaleGiftBox(
 				rpl::single(QString::fromUtf8("\xF0\x9F\x91\x81 Подарить подарок")),
 				st::settingsButtonNoIcon)
 		)->setClickedCallback([=] {
-			AyuFeatures::LocalGifts::GiveUnique(
-				show,
-				to,
-				gift,
-				(state->messageAllowed.current()
-					? state->message.current()
-					: TextWithEntities()),
-				state->hideName.current());
-			closeParentBox(false);
+			const auto text = state->messageAllowed.current()
+				? state->message.current()
+				: TextWithEntities();
+			const auto anonymous = state->hideName.current();
+			const auto close = closeParentBox;
 			box->closeBox();
+			crl::on_main(&to->session(), [=] {
+				close(false);
+				AyuFeatures::LocalGifts::GiveUnique(
+					show,
+					to,
+					gift,
+					text,
+					anonymous);
+			});
 		});
 		Ui::AddSkip(container);
 		Ui::AddDividerText(container, to->isSelf()
